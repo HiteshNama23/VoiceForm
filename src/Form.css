@@ -1,0 +1,272 @@
+/* Existing form styles */
+.form-container {
+  max-width: 75%; /* Adjusted to take 75% of the width */
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  position: relative; /* This makes the form container the reference point for the carousel */
+}
+
+.voice-button,
+.submit-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.voice-button:hover,
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.feedback {
+  font-size: 16px;
+  color: #333;
+  margin: 10px 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.form-label {
+  font-size: 18px;
+  margin-bottom: 5px;
+  display: block;
+  color: #333;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.form-select {
+  background-color: #fff;
+}
+
+.form-radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-radio-group label {
+  margin-bottom: 10px;
+}
+
+.form-radio-group input {
+  margin-right: 5px;
+}
+
+
+@media (max-width: 600px) {
+  .form-container {
+    padding: 15px;
+  }
+
+  .nav-button,
+  .voice-button,
+  .submit-button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .form-label {
+    font-size: 16px;
+  }
+
+  .form-input,
+  .form-select {
+    font-size: 14px;
+  }
+}
+
+
+
+.date-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding-right: 40px; /* Add padding to prevent overlap with the icon */
+}
+
+
+
+/* Date of Birth Field Styles */
+.date-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.form-input[type="date"] {
+  width: 100%;
+  padding-right: 40px; /* Add padding to prevent overlap with the icon */
+  padding: 10px; /* Ensure consistent padding with other input fields */
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  font-size: 20px;
+  color: #555;
+  cursor: pointer;
+}
+
+.calendar-icon:hover {
+  color: #007bff;
+}
+
+/* Focus styles */
+.form-input[type="date"]:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .form-input[type="date"] {
+    padding-right: 30px; /* Adjust padding for smaller screens */
+    font-size: 14px;
+  }
+
+  .calendar-icon {
+    font-size: 18px; /* Adjust icon size for smaller screens */
+  }
+}
+
+.form-dropdown-group {
+  position: relative;
+  width: 100%;
+}
+
+.form-dropdown-toggle {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.form-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.form-dropdown-item {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.form-dropdown-item input {
+  margin-right: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Carousel styles */
+
+.carousel-container {
+  width: 25%;
+  height: 300px; /* Adjust height as needed */
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  animation: scroll 9s linear infinite;
+}
+
+.carousel-image-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.carousel-image {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
