@@ -11,8 +11,8 @@ const Form = () => {
   const [feedback, setFeedback] = useState('');
   const [isConfirmingSubmission, setIsConfirmingSubmission] = useState(false);
   const [isConfirmingFieldInput,setIsConfirmingFieldInput] = useState(false);
-  const [micTimeout, setMicTimeout] = useState(4000);
-
+  const [isRepeating,setIsRepeating] = useState(false);
+  const [micTimeout, setMicTimeout] = useState(5000);
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -41,6 +41,20 @@ const Form = () => {
     stateRef: useRef(null),
     countryRef: useRef(null),
     pincodeRef: useRef(null),
+  };
+
+  const fieldNameMap = {
+    'firstname': 'first name',
+    'lastname': 'last name',
+    'dateofbirth': 'date of birth',
+    'email': 'email',
+    'gender': 'gender',
+    'maritalstatus': 'marital status',
+    'phone': 'phone',
+    'city': 'city',
+    'state': 'state',
+    'country': 'country',
+    'pincode': 'pin code',
   };
 
   const fields = [
@@ -87,45 +101,6 @@ const Form = () => {
       'kuwait', 'oman', 'bahrain'
     ],
     gender: ['mail','female','other'],
-    fieldofstudy: [
-      "computer science","information technology","software engineering","data science","artificial intelligence","cybersecurity",
-      "mechanical engineering",
-      "electrical engineering",
-      "civil engineering",
-      "chemical engineering",
-      "biomedical engineering",
-      "biotechnology",
-      "physics",
-      "chemistry",
-      "biology",
-      "environmental science",
-      "mathematics",
-      "statistics",
-      "aerospace engineering",
-      "robotics",
-      "business administration",
-      "finance",
-      "marketing",
-      "accounting",
-      "human resource management",
-      "supply chain management",
-      "entrepreneurship",
-      "international business",
-      "economics",
-      "business analytics",
-      "literature",
-      "history",
-      "philosophy",
-      "languages",
-      "art history",
-      "cultural studies",
-      "theology",
-      "religious studies",
-      "visual arts",
-      "music",
-      "performing arts",
-      "film studies"
-    ],
     maritalstatus: ['single','married','divorced']
   };
   
@@ -136,9 +111,7 @@ const Form = () => {
  
       const beep = new Audio(Beep);
       beep.play();
-      // const beepDuration = 500;
-
-      // const beepTimeout = setTimeout(() => {
+    
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US';
         recognition.interimResults = false;
@@ -177,11 +150,10 @@ const Form = () => {
 
         return () => {
           recognition.stop();
+          beep.play();
           console.log('Recognition stopped.');
           clearTimeout(timeoutId);
         };
-    //  }, beepDuration);
-    //   return () => clearTimeout(beepTimeout);
     }
   }, [isVoiceEnabled, currentFieldIndex, micTimeout,isConfirmingSubmission,isConfirmingFieldInput]);
 
@@ -232,7 +204,7 @@ const Form = () => {
       [field]: updatedInput,
     }));
     setFeedback(`Captured ${field}: ${updatedInput}`);
-    await promptFieldConfirmation(field, updatedInput);
+    await promptFieldConfirmation();
   };
 
   const parseDateInput = (dateString) => {
@@ -240,7 +212,6 @@ const Form = () => {
         /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/, // e.g., 23/06/2001 or 23-06-2001
         /^\d{1,2} \w+ \d{4}$/,           // e.g., 23 June 2001
     ];
-
     // Parse date in various formats
     for (const format of dateFormats) {
         if (format.test(dateString)) {
@@ -262,7 +233,7 @@ const Form = () => {
         }
     }
     return null; // Invalid date format
-};
+  };
 
   const handleDropdownInput = async (input) => {
     const field = fields[currentFieldIndex];
@@ -275,7 +246,7 @@ const Form = () => {
       }));
       setFeedback(`Selected ${field}: ${input}`);
       // await moveToNextField();
-      await promptFieldConfirmation(field, input);
+      await promptFieldConfirmation();
     } else {
       console.log(`Invalid ${field} input:`, input);
       setFeedback(`Please select a valid ${field} from the dropdown.`);
@@ -283,80 +254,99 @@ const Form = () => {
   };
 
   const handleEmptyInput = async () => {
+    // setIsRepeating(true);
     if(currentFieldIndex!==-1){
-    console.log('No input received for:', fields[currentFieldIndex]);
-    setFeedback(`No input received. Please say your ${fields[currentFieldIndex]} again.`);
+      console.log('No input received for:', fields[currentFieldIndex]);
+      setFeedback(`No input received. Please say your ${fields[currentFieldIndex]} again.`);
     }else{
-      console.log('please say "Submit" to submit the form or "No" ');
-      setFeedback(`please say "Submit" to submit the form or "No"`);
+      console.log('please say "Submit" to submit the form or "change field" ');
+      setFeedback(`please say "Submit" to submit the form or "change field"`);
     }
     setIsVoiceEnabled(false);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    if(currentFieldIndex!==-1){
-       promptUserForField(fields[currentFieldIndex]);
+    if(isConfirmingFieldInput){
+      await promptFieldConfirmation();
+    }else if(currentFieldIndex!==-1){
+      await promptUserForField(fields[currentFieldIndex]);
     }else{
-       promptForSubmission();
+      await handleSubmissionProcess();
     }
   };
 
-  const handleSubmissionConfirmation = async (transcript) => {
-    console.log('Confirming submission with:', transcript);
-    if (transcript === 'submit') {
+  const handleSubmissionProcess = async () => {
+    console.log('Initiating submission process.');
+    setIsVoiceEnabled(false);
+    const fullName = `${formData.firstname}  ${formData.lastname}`;
+    const dateOfBirth = formData.dateofbirth;
+    if(isRepeating === false){
+      await speak(`You have entered full name as ${fullName} and date of birth as ${dateOfBirth} etc`);
+      await speak('Would you like to change first name, last name, etc or submit the form?');
+    }else{
+      await speak('sorry i didnt get your voice, Would you like to change any field, or submit the form?');
+      setIsRepeating(false);
+    }
+    
+    setIsConfirmingSubmission(true);
+    setIsVoiceEnabled(true);
+  };
+
+  const handleSubmissionConfirmation = async (lowerTranscript) => {
+    console.log('Confirming submission with:', lowerTranscript);
+    const fieldToChange = Object.keys(fieldNameMap).find((field) => lowerTranscript.includes(`change ${fieldNameMap[field]}`));
+    const fieldIndex = fields.indexOf(fieldToChange);
+    if (lowerTranscript === 'submit') {
       setFeedback('Form submitted successfully.');
       console.log('Form Data Submitted:', formData);
       resetForm();
-    } else if (transcript === 'no') {
-      setFeedback('Form submission cancelled.');
+    }else if (fieldIndex !== -1) {
       setIsConfirmingSubmission(false);
-      setIsVoiceEnabled(false);
-    } else {
-      setFeedback('Please say "yes" or "no".');
+      setCurrentFieldIndex(fieldIndex);
+      await promptUserForField(fieldToChange);
+    }
+    else {
+      setFeedback('Please say "submit" or "change field".');
       setCurrentFieldIndex(-1);
-      await promptForSubmission();
+      await handleSubmissionProcess();
     }
   };
 
   const moveToNextField = async () => {
     console.log('Moving to the next field.');
     const nextFieldIndex = fields.findIndex((field) => {
-
       return (Array.isArray(formData[field])&&formData[field].length === 0 || formData[field] === '')&& field !== fields[currentFieldIndex];
     });
+    setCurrentFieldIndex(nextFieldIndex);
     if (nextFieldIndex !== -1) {
       console.log('Next field:', fields[nextFieldIndex]);
-      setCurrentFieldIndex(nextFieldIndex);
-      // setMicTimeout(4000);
       await promptUserForField(fields[nextFieldIndex]);
     } else {
       console.log('All fields filled. Prompting for submission.');
-      // setMicTimeout(4000);
-      await promptForSubmission();
+      await handleSubmissionProcess();
     }
   };
 
   const promptUserForField = async (field) => {
     console.log('Prompting for:', field);
     setIsVoiceEnabled(false);
-    // setMicTimeout(4000);
-    await speak(`Please say your ${field}`);
+    if(isRepeating === false){
+      await speak(`Please say your ${field}`);
+    }else{
+      await speak(`sorry i didnt get your voice or the input is invalid can you please repeat ${field}`);
+      setIsRepeating(false);
+    }
     setIsVoiceEnabled(true);
     scrollToField(field);
   };
 
-  const promptForSubmission = async () => {
-    console.log('Prompting for form submission.');
+  const promptFieldConfirmation = async () => {
+    console.log(`Prompting for confirmation of:${fields[currentFieldIndex]}`);
     setIsVoiceEnabled(false);
-    // setMicTimeout(4000);
-    await speak('Do you want to submit the form?');
-    setIsConfirmingSubmission(true);
-    setIsVoiceEnabled(true);
-  };
-
-  const promptFieldConfirmation = async (field, value) => {
-    console.log('Prompting for confirmation of:', field);
-    setIsVoiceEnabled(false);
-    // setMicTimeout(4000);
-    await speak(`Do you want to confirm or edit?`);
+    if(isRepeating === false){
+      await speak(`Do you want to confirm or edit?`);
+    }else{
+      await speak(`sorry i didnt get your voice please say confirm or edit to confirm or edit the field`);
+      setIsRepeating(false);
+    }
     setIsConfirmingFieldInput(true);
     setIsVoiceEnabled(true);
   };
@@ -373,7 +363,7 @@ const Form = () => {
       } else {
         console.log('Invalid response. Asking again for confirmation.');
         setFeedback('Please say "confirm" or "edit".');
-        await promptFieldConfirmation(fields[currentFieldIndex], formData[fields[currentFieldIndex]]);
+        await promptFieldConfirmation();
       }
   };
 
@@ -397,21 +387,16 @@ const Form = () => {
     console.log('Starting voice input.');
     const nextFieldIndex = fields.findIndex((field) => formData[field] === ''||Array.isArray(formData[field])&&formData[field].length === 0);
     console.log('Next empty field index:', nextFieldIndex);
-
+    setCurrentFieldIndex(nextFieldIndex);
     if (nextFieldIndex !== -1) {
       console.log('Next field to fill:', fields[nextFieldIndex]);
-      setCurrentFieldIndex(nextFieldIndex);
-      // setMicTimeout(4000);
       await promptUserForField(fields[nextFieldIndex]);
       console.log('Prompted for field:', fields[nextFieldIndex]);
       setIsVoiceEnabled(true);
       console.log('Voice input enabled.');
     } else {
       console.log('All fields are filled. Prompting for submission.');
-      await promptForSubmission();
-      setCurrentFieldIndex(-1);
-      // setIsConfirmingSubmission(true);
-      // setIsVoiceEnabled(true);
+      await handleSubmissionProcess();
     }
   };
 
@@ -455,7 +440,7 @@ const Form = () => {
         {fields.map((field) => (
           <div key={field} className="form-field" ref={refs[`${field}Ref`]}>
             <label className="form-label">
-              {field.charAt(0).toUpperCase() + field.slice(1)}:
+              {fieldNameMap[field]}:
               {['city', 'state', 'country'].includes(field) ? (
                 <select
                   id={field}
