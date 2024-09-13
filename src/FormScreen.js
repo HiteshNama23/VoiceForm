@@ -195,8 +195,8 @@ const Form = () => {
         return;
       }
     }
-    else if (field === 'email') {
-      updatedInput = input.replace(/\s+/g, '');
+    else{
+      updatedInput = input.replace(/ /g, '');
     }
     console.log(`Captured ${field}:`, updatedInput);
     setFormData((prevData) => ({
