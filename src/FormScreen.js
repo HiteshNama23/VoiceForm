@@ -279,8 +279,8 @@ const Form = () => {
     const fullName = `${formData.firstname}  ${formData.lastname}`;
     const dateOfBirth = formData.dateofbirth;
     if(isRepeating === false){
-      await speak(`You have entered full name as ${fullName} and date of birth as ${dateOfBirth} etc`);
-      await speak('Would you like to change first name, last name, etc or submit the form?');
+      await speak(`You have entered full name as ${fullName} and date of birth as ${dateOfBirth} `);
+      await speak('Would you like to change first name, last name or anything else or submit the form?');
     }else{
       await speak('sorry i didnt get your voice, Would you like to change any field, or submit the form?');
       setIsRepeating(false);
@@ -296,6 +296,7 @@ const Form = () => {
     const fieldIndex = fields.indexOf(fieldToChange);
     if (lowerTranscript === 'submit') {
       setFeedback('Form submitted successfully.');
+      await speak('Form submitted successfully!');
       console.log('Form Data Submitted:', formData);
       resetForm();
     }else if (fieldIndex !== -1) {
